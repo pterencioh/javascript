@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+    <title>Login in</title>
+</head>
+
+<body>
+        <div class="centered-div">
+                <img src="logo.png" alt="Login" id="logo">
+                <div class="sign-up">
+                    <label for="logo">Don't have an account? <a href="#">Sign up</a></label>
+                </div>
+                
+                <div class="username">
+                    <label for="email">Email address</label>
+                    <input type="text" name="email" id="email" required/>
+                </div>
+
+                <div class="password">
+                    <label for="password">Password</label>
+                    <label for="showPassword"></label>  
+                    <input type="password" name="password" id="password" required/>     
+                </div>
+
+                <div class="options">
+                    <a href="#" id="showPassword">Show password</a>
+                    <a href="#" id="forgotPassword">Forgot my password</a>   
+                </div>
+                
+                <div class="remember">
+                    <input type="checkbox" name="rememberMe" id="rememberMe"> Remember me </input>                    
+                </div>
+
+                <button type="button" id="login" disabled>Log in</button>                
+                <hr>
+        </div>
+</body>
+
+</html>
