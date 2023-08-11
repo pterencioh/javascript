@@ -93,6 +93,7 @@ input:-webkit-autofill:focus{
 .options {
     position: relative;
     display: flex;
+    margin: 10px 0;
 }
 .remember {
     margin-bottom: 15px;
@@ -130,4 +131,8 @@ hr {
     font-style: italic;
     margin-top: 5px;
 
+}
+
+#forgotPassword {
+    margin-left: auto;
 }

@@ -1,3 +1,4 @@
+checkLocalStorage();
 const showPasswordElement = document.getElementById("showPassword");
 showPasswordElement.addEventListener("click", showPassword);
 
@@ -7,6 +8,8 @@ emailElement.addEventListener("change", validateEmail);
 const passwordElement = document.getElementById("password");
 passwordElement.addEventListener("change", validateForm);
 
+const loginElement = document.getElementById("login");
+loginElement.addEventListener("click", validateLogin);
 
 function showPassword() {
     const inputPassword = document.getElementById("password");
@@ -25,27 +28,63 @@ function validateEmail() {
         return
     }
 
-    const haveBorderRed = emailElement.style.borderColor == "red";
-    if (haveBorderRed)
-        cleanErrors(emailElement);
+    const hasBorderError = emailElement.style.borderColor == "red";
+    if (hasBorderError)
+        cleanError(emailElement);
+
+    checkLoginButton(passwordElement, emailElement);
 }
 
 function validateForm() {
+    const isPasswordFilled = (passwordElement.value !== "");
+    const hasPasswordError = (passwordElement.style.borderColor == "red");
 
-    const isEmailValid = (emailElement.value != "" && emailElement.style.borderColor == "");
-    const isPasswordValid = (passwordElement.value !== "");
-
-    if (!isEmailValid) {
-        updateErrorMessage(emailElement);
-        return
-    }
-
-    if (!isPasswordValid) {
+    if(!isPasswordFilled){
         addErrorMessage(passwordElement, "Please fill in the password field.");
         return
     }
 
-    enableLoginButton();
+    if(hasPasswordError)
+        cleanError(passwordElement);
+
+    const isEmailFilled = (emailElement.value != "");
+
+    if(!isEmailFilled){
+        addErrorMessage(emailElement, "Please fill in the email field.");
+    }
+
+    checkLoginButton(passwordElement, emailElement);
+}
+
+function validateLogin() {
+    //Checar Remember me
+    checkRememberMe();
+    //Validar se o usuário e senha estão validos
+    //Enviar para proxima pagina
+}
+
+const checkRememberMe = () => {
+    const rememberMeElement = document.getElementById("rememberMe");
+    const isChecked = (rememberMeElement.checked === true);
+ 
+    if(isChecked){
+        localStorage.setItem("username", emailElement.value);
+        localStorage.setItem("password", passwordElement.value);      
+    }
+}
+
+function checkLocalStorage(){
+    const username = localStorage.getItem("username");
+    const password = localStorage.getItem("password");
+    const hasUsername = (username !== null);
+    const hasPassword = (password !== null);
+
+    if(hasUsername && hasPassword){
+        const emailElement = document.getElementById("email");
+        const passwordElement = document.getElementById("password");
+        emailElement.value = username;
+        passwordElement.value = password;
+    }
 }
 
 const addErrorMessage = (element, errorMessage) => {
@@ -55,30 +94,26 @@ const addErrorMessage = (element, errorMessage) => {
 
     element.style.borderColor = "red";
     createErrorMessage(element, errorMessage);
+    checkLoginButton(passwordElement, emailElement);
 }
-
 
 const isElementOnError = (element, errorMessage) => {
     const isBorderRed = (element.style.borderColor === "red");
     if (!isBorderRed)
         return false
 
-    const errorElement = document.getElementsByClassName("errorMessage")[0];
+    const errorElement = document.getElementById("error");
     const sameErrorMessage = (errorElement.innerText == errorMessage);
-    const sameError = (isBorderRed && sameErrorMessage);
-    if (sameError) {
-
+    if (sameErrorMessage)
         return true
-    }
-    const otherError = (isBorderRed && !sameErrorMessage);
-    if (otherError) {
-        cleanErrors(element);
+
+    if (!sameErrorMessage) {
+        cleanError(element);
         createErrorMessage(element, errorMessage);
         return true;
     }
 
 }
-
 
 const createErrorMessage = (element, errorMessage) => {
     const parentElement = element.parentNode;
@@ -88,40 +123,18 @@ const createErrorMessage = (element, errorMessage) => {
     newElement.setAttribute("id","error");
     newElement.innerText = errorMessage;
     parentElement.appendChild(newElement);
+
+    element.style.borderColor = "red";
 }
 
-const cleanErrors = (element) => {
+const cleanError = (element) => {
     const parentElement = element.parentNode;
-    element.style = '';
+    const errorElement = parentElement.querySelector("#error");
 
-    const errorElement = document.getElementsByClassName("errorMessage")[0];
+    element.style = '';
     parentElement.removeChild(errorElement);
 }
 
-const updateErrorMessage = (element) => {
-    const errorElement = document.getElementsByClassName("errorMessage")[0];
-    const existErrorMessage = (errorElement !== undefined);
-    if (!existErrorMessage) {
-        const errorMessage = "Please fill in the email field.";
-        addErrorMessage(element, errorMessage);
-        return
-    }
-
-    errorElement.innerText = "Please fill in the email field.";
-}
-
-/* const canShowLoginButton = () => {
-    const isEmailValid = (emailElement.value != "" && emailElement.style.borderColor == "");
-    const isPasswordValid = (passwordElement.value !== "");
-
-    if(isEmailValid && isPasswordValid){
-        enableLoginButton();
-        return
-    }
-
-    disableLoginButton();
-    
-} */
 const enableLoginButton = () => {
     let loginButton = document.getElementById("login");
     loginButton.removeAttribute('disabled');
@@ -129,7 +142,7 @@ const enableLoginButton = () => {
 
 const disableLoginButton = () => {
     let loginButton = document.getElementById("login");
-    loginButton.addAttribute = 'disabled';
+    loginButton.setAttribute('disabled',"");
 }
 
 const isValidEmail = (valueInput) => {
@@ -145,5 +158,16 @@ const isValidEmail = (valueInput) => {
     return isValid
 }
 
+const checkLoginButton = (passwordElement, emailElement) => {
+    const isPasswordEmpty = (passwordElement.value == '');
+    const isEmailEmpty = (emailElement.value == '');
+    const hasPasswordError = (passwordElement.style.borderColor == 'red');
+    const hasEmailError = (emailElement.style.borderColor == 'red');
 
+    if(!hasPasswordError && !hasEmailError && !isPasswordEmpty && !isEmailEmpty){
+        enableLoginButton();
+        return
+    }
 
+    disableLoginButton();
+}
