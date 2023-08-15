@@ -1,4 +1,3 @@
-checkLocalStorage();
 const showPasswordElement = document.getElementById("showPassword");
 showPasswordElement.addEventListener("click", showPassword);
 
@@ -59,6 +58,20 @@ function validateForm() {
 function validateLogin() {
     //Checar Remember me
     checkRememberMe();
+
+    fetch('/', {
+        method: 'POST',
+        headers: {
+            "Content-Type" : "application/json"
+        },
+        body: JSON.stringify({
+            email: emailElement.value,
+            password: passwordElement.value
+        })
+    })
+        .then(response => { return response.json()})
+        .then(data => { alert(JSON.stringify(data)) })
+        .catch(error  => alert(error))
     //Validar se o usuário e senha estão validos
     //Enviar para proxima pagina
 }
@@ -69,7 +82,8 @@ const checkRememberMe = () => {
  
     if(isChecked){
         localStorage.setItem("username", emailElement.value);
-        localStorage.setItem("password", passwordElement.value);      
+        localStorage.setItem("password", passwordElement.value);
+
     }
 }
 
@@ -84,6 +98,9 @@ function checkLocalStorage(){
         const passwordElement = document.getElementById("password");
         emailElement.value = username;
         passwordElement.value = password;
+
+        checkLoginButton(emailElement,passwordElement);
+
     }
 }
 
@@ -171,3 +188,5 @@ const checkLoginButton = (passwordElement, emailElement) => {
 
     disableLoginButton();
 }
+
+checkLocalStorage();

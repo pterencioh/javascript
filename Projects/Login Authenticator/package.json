@@ -2,5 +2,24 @@
   "dependencies": {
     "express": "^4.18.2",
     "mysql2": "^3.6.0"
-  }
+  },
+  "name": "login-authenticator",
+  "version": "1.0.0",
+  "description": "A login authenticator for web applications.",
+  "main": "server/app.js",
+  "devDependencies": {},
+  "scripts": {
+    "dev": "nodemon server/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pterencioh/javascript.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pterencioh/javascript/issues"
+  },
+  "homepage": "https://github.com/pterencioh/javascript#readme"
 }
