@@ -1,17 +1,8 @@
 const express = require('express');
+const { searchUser } = require('./db');
 const app = express();
 const loginRouter = express.Router();
-var path = require('path')
-const { searchUser } = require('./db');
-app.use(express.static('client'));
-
-
 const port = 8383;
-
-loginRouter.get('/', (req, res) => {
-    res.status(200).send("<h1>sup</h1>")
-})
-
 
 loginRouter.post('/', async (request, response) => {
     const user = {
@@ -20,12 +11,11 @@ loginRouter.post('/', async (request, response) => {
     };
 
     const data = await searchUser(user);
-    response.json(data);
-    console.log(data);
+    const existUser = (data != "");
+    response.json({ "authenticated" : existUser });
 })
 
-
+app.use(express.static('client'));
 app.use(express.json());
 app.use('/', loginRouter);
 app.listen(port, () => console.log(`Server has started on port: ${port}`));
-/* module.exports = app; */

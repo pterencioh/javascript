@@ -1,3 +1,6 @@
+const { errorAuthMessage, createErrorAuthMessage, checkRememberMe, addErrorMessage, isElementOnError,
+    createErrorMessage, cleanError, enableLoginButton, disableLoginButton , isValidEmail, checkLoginButton } = require("utils");
+
 const showPasswordElement = document.getElementById("showPassword");
 showPasswordElement.addEventListener("click", showPassword);
 
@@ -9,6 +12,9 @@ passwordElement.addEventListener("change", validateForm);
 
 const loginElement = document.getElementById("login");
 loginElement.addEventListener("click", validateLogin);
+
+const mainDiv = document.getElementsByClassName("centered-div")[0];
+
 
 function showPassword() {
     const inputPassword = document.getElementById("password");
@@ -23,7 +29,8 @@ function validateEmail() {
 
     if (!isValidValue) {
         const errorMessage = "Please provide a valid email. i.e. 'example@example.com'";
-        addErrorMessage(emailElement, errorMessage);
+        const setBeforeElement = document.getElementsByClassName("password")[0];
+        addErrorMessage(emailElement, setBeforeElement, errorMessage);
         return
     }
 
@@ -39,7 +46,8 @@ function validateForm() {
     const hasPasswordError = (passwordElement.style.borderColor == "red");
 
     if(!isPasswordFilled){
-        addErrorMessage(passwordElement, "Please fill in the password field.");
+        const setBeforeElement = document.getElementsByClassName("options")[0];
+        addErrorMessage(passwordElement, setBeforeElement, "Please fill in the password field.");
         return
     }
 
@@ -49,42 +57,32 @@ function validateForm() {
     const isEmailFilled = (emailElement.value != "");
 
     if(!isEmailFilled){
-        addErrorMessage(emailElement, "Please fill in the email field.");
+        const setBeforeElement = document.getElementsByClassName("password")[0];
+        addErrorMessage(emailElement, setBeforeElement, "Please fill in the email field.");
     }
 
     checkLoginButton(passwordElement, emailElement);
 }
 
 function validateLogin() {
-    //Checar Remember me
     checkRememberMe();
-
-    fetch('/', {
+    var configAPI = {
         method: 'POST',
-        headers: {
-            "Content-Type" : "application/json"
-        },
+        headers: { "Content-Type" : "application/json" },
         body: JSON.stringify({
             email: emailElement.value,
             password: passwordElement.value
         })
-    })
-        .then(response => { return response.json()})
-        .then(data => { alert(JSON.stringify(data)) })
+    };
+
+    fetch('/', configAPI)
+        .then( response => { return response.json() })
+        .then( response => { 
+            if(!response.authenticated){
+
+            }
+        })
         .catch(error  => alert(error))
-    //Validar se o usuário e senha estão validos
-    //Enviar para proxima pagina
-}
-
-const checkRememberMe = () => {
-    const rememberMeElement = document.getElementById("rememberMe");
-    const isChecked = (rememberMeElement.checked === true);
- 
-    if(isChecked){
-        localStorage.setItem("username", emailElement.value);
-        localStorage.setItem("password", passwordElement.value);
-
-    }
 }
 
 function checkLocalStorage(){
@@ -104,89 +102,4 @@ function checkLocalStorage(){
     }
 }
 
-const addErrorMessage = (element, errorMessage) => {
-    const onError = isElementOnError(element, errorMessage);
-    if (onError)
-        return
-
-    element.style.borderColor = "red";
-    createErrorMessage(element, errorMessage);
-    checkLoginButton(passwordElement, emailElement);
-}
-
-const isElementOnError = (element, errorMessage) => {
-    const isBorderRed = (element.style.borderColor === "red");
-    if (!isBorderRed)
-        return false
-
-    const errorElement = document.getElementById("error");
-    const sameErrorMessage = (errorElement.innerText == errorMessage);
-    if (sameErrorMessage)
-        return true
-
-    if (!sameErrorMessage) {
-        cleanError(element);
-        createErrorMessage(element, errorMessage);
-        return true;
-    }
-
-}
-
-const createErrorMessage = (element, errorMessage) => {
-    const parentElement = element.parentNode;
-
-    let newElement = document.createElement("p");
-    newElement.classList.add("errorMessage");
-    newElement.setAttribute("id","error");
-    newElement.innerText = errorMessage;
-    parentElement.appendChild(newElement);
-
-    element.style.borderColor = "red";
-}
-
-const cleanError = (element) => {
-    const parentElement = element.parentNode;
-    const errorElement = parentElement.querySelector("#error");
-
-    element.style = '';
-    parentElement.removeChild(errorElement);
-}
-
-const enableLoginButton = () => {
-    let loginButton = document.getElementById("login");
-    loginButton.removeAttribute('disabled');
-}
-
-const disableLoginButton = () => {
-    let loginButton = document.getElementById("login");
-    loginButton.setAttribute('disabled',"");
-}
-
-const isValidEmail = (valueInput) => {
-    /* 
-        "/^[a-zA-Z0-9._%+-]+" - Corresponds to the username before the @ symbol. It allows both uppercase and lowercase letters, numbers, 
-                                and a few special characters such as dot, hyphen, percent, and plus sign.
-        "@[a-zA-Z0-9.-]+"     - Corresponds to the @ symbol and the email domain after the @ symbol. It permits letters, numbers, dots, and hyphens within the domain.
-        "\.[a-zA-Z]{2,}$/"    - Matches the top-level domain (TLD) of the email. It requires at least two alphabet letters.
-    */
-    const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const isValid = regexEmail.test(valueInput);
-
-    return isValid
-}
-
-const checkLoginButton = (passwordElement, emailElement) => {
-    const isPasswordEmpty = (passwordElement.value == '');
-    const isEmailEmpty = (emailElement.value == '');
-    const hasPasswordError = (passwordElement.style.borderColor == 'red');
-    const hasEmailError = (emailElement.style.borderColor == 'red');
-
-    if(!hasPasswordError && !hasEmailError && !isPasswordEmpty && !isEmailEmpty){
-        enableLoginButton();
-        return
-    }
-
-    disableLoginButton();
-}
-
-checkLocalStorage();
+// checkLocalStorage();

@@ -12,11 +12,10 @@ const connect = () => {
 
     connection.connect(err => {
         if (err)
-            return console.error('Erro ao conectar ao banco de dados:', err);
+            return console.error('Error connecting to database:', err);
 
-        console.log('Conexão com o banco de dados estabelecida');
+        console.log('Database connection established');
     })
-
     return connection
 }
 
@@ -28,6 +27,7 @@ const searchUser = (user) => {
 
         db.query(sql, params, (err, result) => {
             err ? reject(err) : resolve(result);
+            console.log('Database connection completed');
             db.end();
         });
     });
