@@ -52,7 +52,7 @@ a {
 .username {
     display: flex;
     flex-direction: column;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .username input,
@@ -130,8 +130,7 @@ hr {
 .errorMessage {
     color: red;
     font-style: italic;
-    margin-top: 5px;
-
+    margin: 5px 0;
 }
 
 #forgotPassword {

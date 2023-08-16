@@ -1,5 +1,8 @@
-const { errorAuthMessage, createErrorAuthMessage, checkRememberMe, addErrorMessage, isElementOnError,
-    createErrorMessage, cleanError, enableLoginButton, disableLoginButton , isValidEmail, checkLoginButton } = require("utils");
+import {
+    checkRememberMe, isValidEmail, checkLoginButton,
+    addErrorBorder, hasErrorBorder, addErrorMessage,
+    setError, removeErrors
+} from "./utils.js";
 
 const showPasswordElement = document.getElementById("showPassword");
 showPasswordElement.addEventListener("click", showPassword);
@@ -29,14 +32,14 @@ function validateEmail() {
 
     if (!isValidValue) {
         const errorMessage = "Please provide a valid email. i.e. 'example@example.com'";
-        const setBeforeElement = document.getElementsByClassName("password")[0];
-        addErrorMessage(emailElement, setBeforeElement, errorMessage);
+        const beforeElement = document.getElementsByClassName("password")[0];
+        setError(emailElement, mainDiv, beforeElement, "email", errorMessage);
         return
     }
 
     const hasBorderError = emailElement.style.borderColor == "red";
     if (hasBorderError)
-        cleanError(emailElement);
+        removeErrors(emailElement, "email");
 
     checkLoginButton(passwordElement, emailElement);
 }
@@ -45,30 +48,33 @@ function validateForm() {
     const isPasswordFilled = (passwordElement.value !== "");
     const hasPasswordError = (passwordElement.style.borderColor == "red");
 
-    if(!isPasswordFilled){
-        const setBeforeElement = document.getElementsByClassName("options")[0];
-        addErrorMessage(passwordElement, setBeforeElement, "Please fill in the password field.");
+    if (!isPasswordFilled) {
+        const errorMessage = "Please fill in the password field."
+        const beforeElement = document.getElementsByClassName("options")[0];
+        setError(passwordElement, mainDiv, beforeElement, "password", errorMessage)
         return
     }
 
-    if(hasPasswordError)
-        cleanError(passwordElement);
+    if (isPasswordFilled && hasPasswordError)
+        removeErrors(passwordElement, "password");
 
     const isEmailFilled = (emailElement.value != "");
 
-    if(!isEmailFilled){
-        const setBeforeElement = document.getElementsByClassName("password")[0];
-        addErrorMessage(emailElement, setBeforeElement, "Please fill in the email field.");
+    if (!isEmailFilled) {
+        const errorMessage = "Please fill in the email field."
+        const beforeElement = document.getElementsByClassName("password")[0];
+        setError(emailElement, mainDiv, beforeElement, "email", errorMessage);
+        return
     }
 
     checkLoginButton(passwordElement, emailElement);
 }
 
 function validateLogin() {
-    checkRememberMe();
+    checkRememberMe(emailElement, passwordElement);
     var configAPI = {
         method: 'POST',
-        headers: { "Content-Type" : "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             email: emailElement.value,
             password: passwordElement.value
@@ -76,30 +82,42 @@ function validateLogin() {
     };
 
     fetch('/', configAPI)
-        .then( response => { return response.json() })
-        .then( response => { 
-            if(!response.authenticated){
+        .then(response => { return response.json() })
+        .then(response => {
+            if (!response.authenticated) {
+                const emailOnError = hasErrorBorder(emailElement);
+                const passwordOnError = hasErrorBorder(passwordElement);
 
+                if (emailOnError && passwordOnError)
+                    return
+
+                const errorMessage = "I'm sorry, but the email and/or password provided is not correct or does not exist."
+                addErrorBorder(emailElement);
+                addErrorBorder(passwordElement);
+                addErrorMessage(mainDiv, loginElement, "login", errorMessage);
+                return
             }
+
+            window.open("https://www.google.com/", "_self");
         })
-        .catch(error  => alert(error))
+        .catch(error => alert(error))
 }
 
-function checkLocalStorage(){
+function checkLocalStorage() {
     const username = localStorage.getItem("username");
     const password = localStorage.getItem("password");
     const hasUsername = (username !== null);
     const hasPassword = (password !== null);
 
-    if(hasUsername && hasPassword){
+    if (hasUsername && hasPassword) {
         const emailElement = document.getElementById("email");
         const passwordElement = document.getElementById("password");
         emailElement.value = username;
         passwordElement.value = password;
 
-        checkLoginButton(emailElement,passwordElement);
+        checkLoginButton(emailElement, passwordElement);
 
     }
 }
 
-// checkLocalStorage();
+checkLocalStorage();
