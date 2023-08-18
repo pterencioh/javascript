@@ -4,6 +4,8 @@ import {
     setError, removeErrors
 } from "./utils.js";
 
+checkLocalStorage();
+
 const showPasswordElement = document.getElementById("showPassword");
 showPasswordElement.addEventListener("click", showPassword);
 
@@ -71,7 +73,6 @@ function validateForm() {
 }
 
 function validateLogin() {
-    checkRememberMe(emailElement, passwordElement);
     var configAPI = {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
@@ -97,10 +98,10 @@ function validateLogin() {
                 addErrorMessage(mainDiv, loginElement, "login", errorMessage);
                 return
             }
-
-            window.open("https://www.google.com/", "_self");
+            checkRememberMe(emailElement, passwordElement);
+            window.open("/perfil","_self")
         })
-        .catch(error => alert(error))
+        .catch(error => console.log(error))
 }
 
 function checkLocalStorage() {
@@ -120,4 +121,3 @@ function checkLocalStorage() {
     }
 }
 
-checkLocalStorage();

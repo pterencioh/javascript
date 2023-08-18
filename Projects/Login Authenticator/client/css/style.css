@@ -15,19 +15,22 @@ body {
     /*     background: seagreen; */
 }
 
+input::placeholder{
+    opacity: 0.5;
+}
 .centered-div {
     margin-top: -100px;
     width: 500px;
-    /*     background: orangered; */
+/*         background: orangered; */
     border-radius: 20px;
 }
 
 .centered-div img {
     margin-top: 20px;
     position: relative;
-    height: 150px;
-    width: 150px;
-    right: -35%;
+    height: 125px;
+    width: 125px;
+    right: -38%;
 }
 
 .sign-up {
@@ -39,7 +42,9 @@ body {
 a {
     text-decoration: none;
 }
-
+a:link, a:visited {
+    color: #4900db;
+}
 a:active {
     color: #46c9f9;
 }
@@ -54,9 +59,14 @@ a {
     flex-direction: column;
     margin-bottom: 10px;
 }
+.confirmPassword, .name {
+    margin: 10px 0;
+}
 
 .username input,
 .password input,
+.confirmPassword input,
+.name input,
 button
 {
     margin-top: 5px;
@@ -75,7 +85,9 @@ input:-webkit-autofill:focus{
 }
 
 .username input:focus,
-.password input:focus{
+.password input:focus,
+.confirmPassword input:focus,
+.name input:focus{
     border-color: #46c9f9;
     outline:none;
 }
@@ -85,9 +97,15 @@ input:-webkit-autofill:focus{
     flex-direction: column;
 }
 
-.password a {
+.password a, .confirmPassword a {
     margin-top: 5px;
     font-size: 12px;
+}
+
+#showConfirmPassword {
+    display: block;
+    margin-top: 5px;
+  /*   margin-top: 50px; */
 }
 
 .options {
