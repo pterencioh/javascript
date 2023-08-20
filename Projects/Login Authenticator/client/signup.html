@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create your account</title>
     <link rel="stylesheet" href="./css/style.css">
+    <script type="module" src="./js/signup.js" defer></script>
 </head>
 <body>
     <div class="centered-div">
@@ -15,7 +16,7 @@
 
         <div class="name">
             <label for="name">Name</label>
-            <input type="text" name="name" id="name" placeholder="Fill in your full name."/>
+            <input type="text" name="name" id="name" placeholder="Fill in your name."/>
         </div>
 
         <div class="username">
@@ -26,12 +27,18 @@
         <div class="password">
             <label for="password">Password</label>
             <input type="password" name="password" id="password" placeholder="Fill in your password."/>
+        </div>
+
+        <div class="showPassword">
             <a href="#" id="showPassword">Show password</a>
         </div>
 
         <div class="confirmPassword">
             <label for="confirmPassword">Repeat Password</label>
-            <input type="confirmPassword" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password."/>
+            <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm your password."/>
+        </div>
+
+        <div class="showConfirmPassword">
             <a href="#" id="showConfirmPassword">Show password</a>
         </div>
 

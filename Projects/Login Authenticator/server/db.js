@@ -36,9 +36,9 @@ const searchUser = (user) => {
 const insertUser = (user) => {
     return new Promise((resolve, reject) => {
         const db = connect();
-        const columns = "name, username, user_password, remember_me, login_type, last_login_at";
-        const sql = `INSERT INTO users (${columns}) values (? , ? , ? , ? , ? , ?)`;
-        const params = [user.name, user.username, user.password, user.remember, user.loginType, user.loginAt];
+        const columns = "name, username, user_password";
+        const sql = `INSERT INTO users (${columns}) values (? , ? , ?)`;
+        const params = [user.name, user.username, user.password];
 
         db.query(sql, params, (err, result) => {
             err ? reject(err) : resolve(result);

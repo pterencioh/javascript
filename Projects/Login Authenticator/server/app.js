@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const { searchUser } = require('./db');
+const { searchUser, insertUser } = require('./db');
 const app = express();
 const loginRouter = express.Router();
 const port = 8383;
@@ -24,6 +24,24 @@ loginRouter.get('/perfil', (request, response) => {
 loginRouter.get('/signup', (request, response) => {
     const directory = path.resolve(__dirname, '..');
     response.sendFile(directory + '/client/signup.html');
+})
+
+loginRouter.post('/signup', async (request, response) => {
+    if(!request.body){
+        response.send({ 
+            "response" : false,
+            "message" : "Access denied."
+        });
+        return
+    }
+    const user = {
+        name: request.body.name,
+        username: request.body.email,
+        password: request.body.password
+    };
+
+    const data = await insertUser(user);
+    console.log(data.insertId);
 })
 
 loginRouter.get('/forgot', (request, response) => {

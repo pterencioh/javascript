@@ -8,13 +8,13 @@ const checkRememberMe = (emailElement, passwordElement) => {
     }
 }
 
-const enableLoginButton = () => {
-    let loginButton = document.getElementById("login");
+const enableLoginButton = (elementId) => {
+    let loginButton = document.getElementById(elementId);
     loginButton.removeAttribute('disabled');
 }
 
-const disableLoginButton = () => {
-    let loginButton = document.getElementById("login");
+const disableLoginButton = (elementId) => {
+    let loginButton = document.getElementById(elementId);
     loginButton.setAttribute('disabled', "");
 }
 
@@ -31,18 +31,29 @@ const isValidEmail = (valueInput) => {
     return isValid
 }
 
-const checkLoginButton = (passwordElement, emailElement) => {
+const hasOnlyLetters = (valueInput) => {
+    /* 
+        "^[A-Za-z ]" - Matches any uppercase or lowercase letter and spaces. 
+        "+$"         - Indicates that the preceding character (letters and spaces) should occur one or more times.
+    */
+    const regexLetters = /^[A-Za-z ]+$/;
+    const onlyLetters = regexLetters.test(valueInput);
+
+    return onlyLetters
+}
+
+const checkLoginButton = (passwordElement, emailElement, elementId) => {
     const isPasswordEmpty = (passwordElement.value == '');
     const isEmailEmpty = (emailElement.value == '');
     const hasPasswordError = (passwordElement.style.borderColor == 'red');
     const hasEmailError = (emailElement.style.borderColor == 'red');
 
     if (!hasPasswordError && !hasEmailError && !isPasswordEmpty && !isEmailEmpty) {
-        enableLoginButton();
+        enableLoginButton(elementId);
         return
     }
 
-    disableLoginButton();
+    disableLoginButton(elementId);
 }
 
 const addErrorBorder = (element) => {
@@ -103,9 +114,41 @@ const removeErrors = (element, type) => {
     removeErrorMessage(type);
 }
 
+const checkRecoverButton = (emailElement, elementId) => {
+    const isEmailEmpty = (emailElement.value == "");
+    const isEmailError = (emailElement.style.borderColor == "red");
+
+    if(!isEmailEmpty && !isEmailError){
+        enableLoginButton(elementId);
+        return
+    }
+
+    disableLoginButton(elementId);
+}
+
+const checkSignupButton = (nameElement, emailElement, passwordElement, confirmElement) => {
+    const isNameFilled = (nameElement.value !== "");
+    const hasNameError = (nameElement.style.borderColor == "red");
+    const isEmailFilled = (emailElement.value !== "");
+    const hasEmailError = (emailElement.style.borderColor == "red");
+    const isPasswordFilled = (passwordElement.value !== "");
+    const hasPasswordError = (passwordElement.style.borderColor == "red");
+    const isConfirmFilled = (confirmElement.value !== "");
+    const hasConfirmError = (confirmElement.style.borderColor == "red");
+
+    if(isNameFilled && !hasNameError &&
+        isEmailFilled && !hasEmailError &&
+        isPasswordFilled && !hasPasswordError &&
+        isConfirmFilled && !hasConfirmError){
+            enableLoginButton("signup");
+            return
+        }
+    disableLoginButton("signup");
+}
 
 export {
     checkRememberMe, isValidEmail, checkLoginButton,
     addErrorBorder, hasErrorBorder, addErrorMessage,
-    setError, removeErrors
+    setError, removeErrors, checkRecoverButton,
+    hasOnlyLetters, checkSignupButton
 };

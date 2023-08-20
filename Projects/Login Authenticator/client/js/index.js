@@ -43,7 +43,7 @@ function validateEmail() {
     if (hasBorderError)
         removeErrors(emailElement, "email");
 
-    checkLoginButton(passwordElement, emailElement);
+    checkLoginButton(passwordElement, emailElement, "login");
 }
 
 function validateForm() {
@@ -69,7 +69,7 @@ function validateForm() {
         return
     }
 
-    checkLoginButton(passwordElement, emailElement);
+    checkLoginButton(passwordElement, emailElement, "login");
 }
 
 function validateLogin() {
@@ -116,7 +116,7 @@ function checkLocalStorage() {
         emailElement.value = username;
         passwordElement.value = password;
 
-        checkLoginButton(emailElement, passwordElement);
+        checkLoginButton(emailElement, passwordElement, "login");
 
     }
 }
