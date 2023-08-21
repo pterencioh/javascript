@@ -1,19 +1,23 @@
-const checkRememberMe = (emailElement, passwordElement) => {
+const checkRememberMe = (user) => {
     const rememberMeElement = document.getElementById("rememberMe");
     const isChecked = (rememberMeElement.checked === true);
 
     if (isChecked) {
-        localStorage.setItem("username", emailElement.value);
-        localStorage.setItem("password", passwordElement.value);
+        localStorage.setItem("name", user.name);
+        localStorage.setItem("avatar", user.avatar);
+        return
     }
+
+    sessionStorage.setItem("name", user.name);
+    sessionStorage.setItem("avatar", user.avatar);
 }
 
-const enableLoginButton = (elementId) => {
+const enableSubmitButton = (elementId) => {
     let loginButton = document.getElementById(elementId);
     loginButton.removeAttribute('disabled');
 }
 
-const disableLoginButton = (elementId) => {
+const disableSubmitButton = (elementId) => {
     let loginButton = document.getElementById(elementId);
     loginButton.setAttribute('disabled', "");
 }
@@ -49,11 +53,11 @@ const checkLoginButton = (passwordElement, emailElement, elementId) => {
     const hasEmailError = (emailElement.style.borderColor == 'red');
 
     if (!hasPasswordError && !hasEmailError && !isPasswordEmpty && !isEmailEmpty) {
-        enableLoginButton(elementId);
+        enableSubmitButton(elementId);
         return
     }
 
-    disableLoginButton(elementId);
+    disableSubmitButton(elementId);
 }
 
 const addErrorBorder = (element) => {
@@ -119,11 +123,11 @@ const checkRecoverButton = (emailElement, elementId) => {
     const isEmailError = (emailElement.style.borderColor == "red");
 
     if(!isEmailEmpty && !isEmailError){
-        enableLoginButton(elementId);
+        enableSubmitButton(elementId);
         return
     }
 
-    disableLoginButton(elementId);
+    disableSubmitButton(elementId);
 }
 
 const checkSignupButton = (nameElement, emailElement, passwordElement, confirmElement) => {
@@ -140,15 +144,15 @@ const checkSignupButton = (nameElement, emailElement, passwordElement, confirmEl
         isEmailFilled && !hasEmailError &&
         isPasswordFilled && !hasPasswordError &&
         isConfirmFilled && !hasConfirmError){
-            enableLoginButton("signup");
+            enableSubmitButton("signup");
             return
         }
-    disableLoginButton("signup");
+    disableSubmitButton("signup");
 }
 
 export {
     checkRememberMe, isValidEmail, checkLoginButton,
     addErrorBorder, hasErrorBorder, addErrorMessage,
     setError, removeErrors, checkRecoverButton,
-    hasOnlyLetters, checkSignupButton
+    hasOnlyLetters, checkSignupButton, disableSubmitButton
 };

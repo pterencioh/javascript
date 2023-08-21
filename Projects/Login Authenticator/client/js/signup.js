@@ -1,6 +1,6 @@
 import {
-    isValidEmail, setError, removeErrors, checkSignupButton, 
-    hasOnlyLetters
+    isValidEmail, setError, removeErrors, checkSignupButton,
+    hasOnlyLetters, disableSubmitButton
 } from "./utils.js";
 
 const mainDiv = document.getElementsByClassName("centered-div")[0];
@@ -37,7 +37,7 @@ function validateName() {
     }
 
     const hasBorderError = nameElement.style.borderColor == "red";
-    if(hasBorderError)
+    if (hasBorderError)
         removeErrors(nameElement, "name");
 
     checkSignupButton(nameElement, emailElement, passwordElement, confirmPassElement);
@@ -78,10 +78,10 @@ function validatePassword() {
 
     const isConfirmFilled = (confirmPassElement.value !== "");
     const hasConfirmError = (confirmPassElement.style.borderColor == "red");
-    if(isConfirmFilled)
+    if (isConfirmFilled)
         confirmPassElement.value = "";
 
-    if(hasConfirmError)
+    if (hasConfirmError)
         removeErrors(confirmPassElement, "confirm");
 
     checkSignupButton(nameElement, emailElement, passwordElement, confirmPassElement);
@@ -116,7 +116,7 @@ function verifyPassword() {
     }
 
     const isSamePassword = (passwordElement.value == confirmPassElement.value);
-    if(!isSamePassword){
+    if (!isSamePassword) {
         const errorMessage = "Your password doesn't match!";
         const beforeElementForPassword = document.getElementsByClassName("showPassword")[0];
         const beforeElementForConfirm = document.getElementsByClassName("showConfirmPassword")[0];
@@ -129,7 +129,7 @@ function verifyPassword() {
     const hasPasswordError = (passwordElement.style.borderColor == "red");
     const hasConfirmError = (confirmPassElement.style.borderColor == "red");
 
-    if(isSamePassword && hasPasswordError && hasConfirmError){
+    if (isSamePassword && hasPasswordError && hasConfirmError) {
         removeErrors(passwordElement, "password");
         removeErrors(confirmPassElement, "confirm");
     }
@@ -157,9 +157,34 @@ function signupUser() {
     };
 
     fetch('/signup', configAPI)
-        .then(response => { return response })
-        .then(response => {
-            console.log(response);
+        .then(response => { return response.json() })
+        .then(responseJSON => {
+            const usernameUnavailable = (responseJSON.status == 409);
+            if(usernameUnavailable){
+                const hasUsernameError = (emailElement.style.borderColor == "red");
+                if(!hasUsernameError){
+                    const errorMessage = "Sorry, but the chosen username is already in use.";
+                    const beforeElement = document.getElementsByClassName("password")[0];
+                    setError(emailElement, mainDiv, beforeElement, "username", errorMessage);
+                    checkSignupButton(nameElement, emailElement, passwordElement, confirmPassElement);
+                    return
+                }
+            }
+
+            const userCreated = (responseJSON.status == 200);
+            if(userCreated){
+                sessionStorage.setItem("name", responseJSON.data.name);
+                sessionStorage.setItem("avatar", responseJSON.data.avatar);
+                window.open("/perfil","_self");
+                return
+            }
+
+            if(!userCreated && !usernameUnavailable){
+                setError(emailElement, mainDiv, signupElement, "signup", responseJSON.message);
+                disableSubmitButton("signup");
+                return
+            }
+
         });
 
 }

@@ -85,7 +85,7 @@ function validateLogin() {
     fetch('/', configAPI)
         .then(response => { return response.json() })
         .then(response => {
-            if (!response.authenticated) {
+            if (!response.answer) {
                 const emailOnError = hasErrorBorder(emailElement);
                 const passwordOnError = hasErrorBorder(passwordElement);
 
@@ -98,26 +98,22 @@ function validateLogin() {
                 addErrorMessage(mainDiv, loginElement, "login", errorMessage);
                 return
             }
-            checkRememberMe(emailElement, passwordElement);
+
+            const user = response.data;
+            checkRememberMe(user);
             window.open("/perfil","_self")
         })
         .catch(error => console.log(error))
 }
 
 function checkLocalStorage() {
-    const username = localStorage.getItem("username");
-    const password = localStorage.getItem("password");
-    const hasUsername = (username !== null);
-    const hasPassword = (password !== null);
+    const name = localStorage.getItem("name");
+    const avatar = localStorage.getItem("avatar");
+    const hasName = (name !== null);
+    const hasAvatar = (avatar !== null);
 
-    if (hasUsername && hasPassword) {
-        const emailElement = document.getElementById("email");
-        const passwordElement = document.getElementById("password");
-        emailElement.value = username;
-        passwordElement.value = password;
-
-        checkLoginButton(emailElement, passwordElement, "login");
-
+    if (hasName && hasAvatar) {
+        window.open("/perfil", "_self");
     }
 }
 
