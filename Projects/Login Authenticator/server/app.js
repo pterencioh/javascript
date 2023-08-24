@@ -1,6 +1,13 @@
 const express = require('express');
 const path = require('path');
-const { searchAccount, insertUser, updateLastLogin, isUsernameAvailable } = require('./db');
+const {
+    searchAccount, insertUser, updateLastLogin, isUsernameAvailable,
+    addConfirmationKey, confirmAccount, updatePassword, searchChangeRequest, 
+    searchEmail
+} = require('./db');
+
+const { generateConfirmationToken } = require('./security');
+const { sendPassChangeEmail } = require('./email');
 const app = express();
 const loginRouter = express.Router();
 const port = 8383;
@@ -78,7 +85,7 @@ loginRouter.post('/perfil', async (request, response) => {
             username: request.body.username,
             password: request.body.password
         }
-     
+
         const data = await searchAccount(user);
         response.status(200).json({
             "answer": true,
@@ -165,6 +172,144 @@ loginRouter.get('/forgot', (request, response) => {
     response.sendFile(directory + '/client/forgot.html');
 })
 
+loginRouter.post('/forgot', async (request, response) => {
+    try {
+        if (!request.body) {
+            response.status(400).json({
+                "answer": false,
+                "status": 400,
+                "message": "Access denied."
+            });
+            return
+        }
+
+        const username = request.body.email;
+        const existUsername = await searchEmail(username);
+        if(!existUsername || existUsername == ""){
+            response.status(404).json({
+                "answer": false,
+                "status": 404,
+                "message": "The user was not found."
+            });
+            return
+        }
+
+        const alreadySentRequest = (existUsername[0].confirmation_key != "");
+        if(alreadySentRequest){
+            response.status(409).json({
+                "answer": false,
+                "status": 409,
+                "message": "Already exist a password change request."
+            });
+            return
+        }
+        
+        const userID = existUsername[0].id;
+        const confirmationKey = generateConfirmationToken();
+
+        const updateUser = await addConfirmationKey(confirmationKey, userID);
+        if(!updateUser || updateUser == ""){
+            response.status(500).json({
+                "answer": false,
+                "status": 500,
+                "message": "An error occurred while updating your confirmation key."
+            })
+            return
+        }
+
+        const sendEmail = await sendPassChangeEmail(userID, username, confirmationKey);
+        if(sendEmail){
+            response.status(200).json({
+                "answer": false,
+                "status": 200,
+                "message": "Password change email sent successfully"
+            });
+            console.log("Password change email sent successfully.");
+            return
+        }
+
+    } catch (error) {
+        console.error(error);
+        response.status(500).json({
+            "answer": false,
+            "status": 500,
+            "message": "An error occurred while processing your request."
+        })
+    }
+
+
+})
+
+loginRouter.get('/password', async (request, response) => {
+    try {
+        const userID = request.query.id;
+        const confirmationKey = request.query.key;
+        const isValidID = (userID != undefined && userID != "");
+        const isValidKey = (confirmationKey != undefined && confirmationKey != "");
+
+        if (!isValidID || !isValidKey) {
+            response.status(400).json({
+                "answer": false,
+                "status": 400,
+                "message": "Access denied."
+            });
+            return
+        }
+
+        const existRequest = await searchChangeRequest(userID, confirmationKey);
+
+        if (!existRequest || existRequest == "") {
+            response.status(404).json({
+                "answer": false,
+                "status": 404,
+                "message": "The request was not found."
+            });
+            return
+        }
+        const directory = path.resolve(__dirname, '../');
+        response.sendFile(directory + '/client/new_password.html');
+    } catch (error) {
+        console.error(error);
+        response.status(500).json({
+            "answer": false,
+            "status": 500,
+            "message": "An error occurred while processing your request."
+        })
+    }
+})
+
+loginRouter.post('/password', async (request, response) => {
+    try {
+        if (!request.body) {
+            response.status(400).json({
+                "answer": false,
+                "status": 400,
+                "message": "Access denied."
+            });
+            return
+        }
+        const userID = request.body.id;
+        const password = request.body.password;
+
+        const setPass = await updatePassword(password, userID);
+        const confirm = await confirmAccount(userID);
+
+        if (setPass && confirm) {
+            response.status(200).json({
+                "answer": true,
+                "status": 200,
+                "message": "Password successfully updated."
+            })
+        }
+    } catch (error) {
+        console.error(error);
+        response.status(500).json({
+            "answer": false,
+            "status": 500,
+            "message": "An error occurred while processing your request."
+        })
+    }
+})
 app.use(express.static('client'));
 app.use(express.json());
 app.use('/', loginRouter);

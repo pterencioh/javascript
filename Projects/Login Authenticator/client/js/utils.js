@@ -122,7 +122,7 @@ const checkRecoverButton = (emailElement, elementId) => {
     const isEmailEmpty = (emailElement.value == "");
     const isEmailError = (emailElement.style.borderColor == "red");
 
-    if(!isEmailEmpty && !isEmailError){
+    if (!isEmailEmpty && !isEmailError) {
         enableSubmitButton(elementId);
         return
     }
@@ -140,19 +140,35 @@ const checkSignupButton = (nameElement, emailElement, passwordElement, confirmEl
     const isConfirmFilled = (confirmElement.value !== "");
     const hasConfirmError = (confirmElement.style.borderColor == "red");
 
-    if(isNameFilled && !hasNameError &&
+    if (isNameFilled && !hasNameError &&
         isEmailFilled && !hasEmailError &&
         isPasswordFilled && !hasPasswordError &&
-        isConfirmFilled && !hasConfirmError){
-            enableSubmitButton("signup");
-            return
-        }
+        isConfirmFilled && !hasConfirmError) {
+        enableSubmitButton("signup");
+        return
+    }
     disableSubmitButton("signup");
+}
+
+const checkChangePassButton = (passwordElement, confirmElement) => {
+    const isPasswordFilled = (passwordElement.value !== "");
+    const hasPasswordError = (passwordElement.style.borderColor == "red");
+    const isConfirmFilled = (confirmElement.value !== "");
+    const hasConfirmError = (confirmElement.style.borderColor == "red");
+
+    if (isPasswordFilled && !hasPasswordError &&
+        isConfirmFilled && !hasConfirmError) {
+        enableSubmitButton("changePass");
+        return
+    }
+
+    disableSubmitButton("changePass");
 }
 
 export {
     checkRememberMe, isValidEmail, checkLoginButton,
     addErrorBorder, hasErrorBorder, addErrorMessage,
     setError, removeErrors, checkRecoverButton,
-    hasOnlyLetters, checkSignupButton, disableSubmitButton
+    hasOnlyLetters, checkSignupButton, disableSubmitButton,
+    checkChangePassButton
 };

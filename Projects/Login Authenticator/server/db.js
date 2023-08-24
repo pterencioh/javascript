@@ -66,7 +66,7 @@ const updateLastLogin = (userID) => {
 const isUsernameAvailable = (username) => {
     return new Promise((resolve, reject) => {
         const db = connect();
-        const sql = 'SELECT username FROM users WHERE username = ?'
+        const sql = 'SELECT username FROM users WHERE username = ?';
         const params = [username];
 
         db.query(sql, params, (err, result) => {
@@ -77,4 +77,78 @@ const isUsernameAvailable = (username) => {
     })
 }
 
-module.exports = { searchAccount, insertUser, updateLastLogin, isUsernameAvailable };
+const addConfirmationKey = (confirmationKey, userID) => {
+    return new Promise((resolve, reject) => {
+        const db = connect();
+        const sql = 'UPDATE users SET confirmation_key = ? WHERE id = ?';
+        const params = [confirmationKey, userID];
+
+        db.query(sql, params, (err, result) => {
+            err ? reject(err) : resolve(result);
+            console.log('Database connection completed - addConfirmationKey');
+            db.end();
+        })
+    })
+}
+
+const confirmAccount = (userID) => {
+    return new Promise((resolve, reject) => {
+        const db = connect();
+        const sql = 'UPDATE users SET confirmed = ?, confirmation_key = ? WHERE id = ?'
+        const params = [true, "", userID];
+
+        db.query(sql, params, (err, result) => {
+            err ? reject(err) : resolve(result);
+            console.log('Database connection completed - confirmAccount');
+            db.end();
+        })
+    })
+}
+
+const updatePassword = (password, userID) => {
+    return new Promise((resolve, reject) => {
+        const db = connect();
+        const sql = 'UPDATE users SET user_password = ? WHERE id = ?';
+        const params = [password, userID];
+
+        db.query(sql, params, (err, result) => {
+            err ? reject(err) : resolve(result);
+            console.log('Database connection completed - updatePassword');
+            db.end();
+        })
+    })
+}
+
+const searchChangeRequest = (userID, confirmationKey) => {
+    return new Promise((resolve, reject) => {
+        const db = connect();
+        const sql = 'SELECT id, confirmed, confirmation_key FROM users WHERE id = ? AND confirmation_key = ? AND confirmed = ?';
+        const params = [userID, confirmationKey, false];
+
+        db.query(sql, params, (err, result) => {
+            err ? reject(err) : resolve(result);
+            console.log('Database connection completed - searchChangeRequest');
+            db.end();
+        })
+    })
+}
+
+const searchEmail = (email) => {
+    return new Promise((resolve, reject) => {
+        const db = connect();
+        const sql = 'SELECT id, username, confirmation_key FROM users WHERE username = ?';
+        const params = [email];
+
+        db.query(sql, params, (err, result) => {
+            err ? reject(err) : resolve(result);
+            console.log('Database connection completed - searchEmail');
+            db.end();
+        })
+    })
+}
+
+module.exports = { 
+    searchAccount, insertUser, updateLastLogin, isUsernameAvailable,
+    addConfirmationKey, confirmAccount, updatePassword, searchChangeRequest,
+    searchEmail
+};
