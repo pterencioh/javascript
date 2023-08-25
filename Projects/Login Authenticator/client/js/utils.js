@@ -118,7 +118,7 @@ const removeErrors = (element, type) => {
     removeErrorMessage(type);
 }
 
-const checkRecoverButton = (emailElement, elementId) => {
+const checkChangeButton = (emailElement, elementId) => {
     const isEmailEmpty = (emailElement.value == "");
     const isEmailError = (emailElement.style.borderColor == "red");
 
@@ -168,7 +168,7 @@ const checkChangePassButton = (passwordElement, confirmElement) => {
 export {
     checkRememberMe, isValidEmail, checkLoginButton,
     addErrorBorder, hasErrorBorder, addErrorMessage,
-    setError, removeErrors, checkRecoverButton,
+    setError, removeErrors, checkChangeButton,
     hasOnlyLetters, checkSignupButton, disableSubmitButton,
     checkChangePassButton
 };

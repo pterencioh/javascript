@@ -6,40 +6,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="module" src="./js/index.js" defer></script>
     <link rel="stylesheet" href="./css/style.css">
-    <link rel="icon" type="image/x-icon" href="./img/logo.png"/>
+    <link rel="icon" type="image/x-icon" href="./img/logo.png" />
+    <script src="https://accounts.google.com/gsi/client" async></script>
     <title>Login in</title>
 </head>
-
 <body>
-        <div class="centered-div">
-            <a href="/"><img src="./img/logo.png" alt="Login" id="logo"></a>
-            <div class="sign-up">
-                <label for="logo">Don't have an account? <a href="/signup">Sign up</a></label>
-            </div>
-
-            <div class="username">
-                <label for="email">Email address</label>
-                <input type="email" name="email" id="email" required placeholder="Fill in your username." />
-            </div>
-
-            <div class="password">
-                <label for="password">Password</label>
-                <label for="showPassword"></label>
-                <input type="password" name="password" id="password" required placeholder="Fill in your password."/>
-            </div>
-
-            <div class="options">
-                <a href="#" id="showPassword">Show password</a>
-                <a href="/forgot" id="forgotPassword">Forgot my password</a>
-            </div>
-
-            <div class="remember">
-                <input type="checkbox" name="rememberMe" id="rememberMe"> Remember me </input>
-            </div>
-
-            <button type="submit" id="login" disabled>Log in</button>
-            <hr>
+    <div class="centered-div">
+        <a href="/"><img src="./img/logo.png" alt="Login" id="logo"></a>
+        <div class="sign-up">
+            <label for="logo">Don't have an account? <a href="/signup">Sign up</a></label>
         </div>
+
+        <div class="username">
+            <label for="email">Email address</label>
+            <input type="email" name="email" id="email" required placeholder="Fill in your username." />
+        </div>
+
+        <div class="password">
+            <label for="password">Password</label>
+            <label for="showPassword"></label>
+            <input type="password" name="password" id="password" required placeholder="Fill in your password." />
+        </div>
+
+        <div class="options">
+            <a href="#" id="showPassword">Show password</a>
+            <a href="/forgot" id="forgotPassword">Forgot my password</a>
+        </div>
+
+        <div class="remember">
+            <input type="checkbox" name="rememberMe" id="rememberMe"> Remember me </input>
+        </div>
+
+        <button type="submit" id="login" disabled>Log in</button>
+        <hr>
+
+        <div id="g_id_onload" data-client_id="750160948383-jkbhb3jq0t8vthqadr8s22s0cpf5pkq9.apps.googleusercontent.com"
+            data-context="signin" data-ux_mode="popup" data-callback="teste123" data-auto_prompt="false">
+        </div>
+
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_blue"
+            data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="400">
+        </div>
+    
+    </div>
 </body>
+<script>
+    function teste123(response) {
+       // decodeJwtResponse() is a custom function defined by you
+       // to decode the credential response.
+       console.log(JSON.parse(response));
+/*        const responsePayload = decodeJwtResponse(response.credential);
+  
+       console.log("ID: " + responsePayload.sub);
+       console.log('Full Name: ' + responsePayload.name);
+       console.log('Given Name: ' + responsePayload.given_name);
+       console.log('Family Name: ' + responsePayload.family_name);
+       console.log("Image URL: " + responsePayload.picture);
+       console.log("Email: " + responsePayload.email); */
+    }
+  </script>
 
 </html>
+

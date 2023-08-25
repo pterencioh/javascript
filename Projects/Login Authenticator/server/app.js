@@ -1,12 +1,13 @@
 const express = require('express');
+const bcrypt = require("bcryptjs");
 const path = require('path');
 const {
-    searchAccount, insertUser, updateLastLogin, isUsernameAvailable,
-    addConfirmationKey, confirmAccount, updatePassword, searchChangeRequest, 
+    insertUser, updateLastLogin, isUsernameAvailable,
+    addChangeKey, removeChangeKey, updatePassword, searchChangeRequest,
     searchEmail
 } = require('./db');
 
-const { generateConfirmationToken } = require('./security');
+const { generateChangeToken, decodeJWTgoogleToken } = require('./security');
 const { sendPassChangeEmail } = require('./email');
 const app = express();
 const loginRouter = express.Router();
@@ -28,10 +29,30 @@ loginRouter.post('/', async (request, response) => {
             password: request.body.password
         };
 
-        const data = await searchAccount(user);
+        const data = await searchEmail(user.username);
         const existUser = (data != "");
 
-        if (existUser) {
+        if (!existUser) {
+            response.status(404).json({
+                "answer": false,
+                "status": 404,
+                "message": "The user was not found."
+            });
+            return
+        }
+
+        const samePassword = await bcrypt.compare(user.password, data[0].user_password);
+        if (!samePassword) {
+            response.status(409).json({
+                "answer": false,
+                "status": 409,
+                "message": "The user email or password is not valid."
+            });
+            return
+        }
+
+        if (existUser && samePassword) {
+
             const setLastLogin = await updateLastLogin(data[0].id);
             if (setLastLogin) {
                 response.status(200).json({
@@ -47,13 +68,7 @@ loginRouter.post('/', async (request, response) => {
             }
         }
 
-        if (!existUser) {
-            response.status(404).json({
-                "answer": false,
-                "status": 404,
-                "message": "The user was not found."
-            });
-        }
+
     } catch (error) {
         console.error(error);
         response.status(500).json({
@@ -80,7 +95,7 @@ loginRouter.post('/perfil', async (request, response) => {
             });
             return
         }
-        console.log(JSON.stringify(request.body));
+
         const user = {
             username: request.body.username,
             password: request.body.password
@@ -126,10 +141,11 @@ loginRouter.post('/signup', async (request, response) => {
         const randomNumber = Math.floor(Math.random() * 10); //Only [0-9]
         const profileAvatar = `user_profile${randomNumber}.png`;
 
+        const hashPass = await bcrypt.hash(request.body.password, 10);
         const user = {
             name: request.body.name,
             username: request.body.email,
-            password: request.body.password,
+            password: hashPass,
             avatar: profileAvatar
         };
 
@@ -185,7 +201,7 @@ loginRouter.post('/forgot', async (request, response) => {
 
         const username = request.body.email;
         const existUsername = await searchEmail(username);
-        if(!existUsername || existUsername == ""){
+        if (!existUsername || existUsername == "") {
             response.status(404).json({
                 "answer": false,
                 "status": 404,
@@ -194,8 +210,8 @@ loginRouter.post('/forgot', async (request, response) => {
             return
         }
 
-        const alreadySentRequest = (existUsername[0].confirmation_key != "");
-        if(alreadySentRequest){
+        const alreadySentRequest = (existUsername[0].change_key != "");
+        if (alreadySentRequest) {
             response.status(409).json({
                 "answer": false,
                 "status": 409,
@@ -203,22 +219,22 @@ loginRouter.post('/forgot', async (request, response) => {
             });
             return
         }
-        
-        const userID = existUsername[0].id;
-        const confirmationKey = generateConfirmationToken();
 
-        const updateUser = await addConfirmationKey(confirmationKey, userID);
-        if(!updateUser || updateUser == ""){
+        const userID = existUsername[0].id;
+        const changeKey = generateChangeToken();
+
+        const updateUser = await addChangeKey(changeKey, userID);
+        if (!updateUser || updateUser == "") {
             response.status(500).json({
                 "answer": false,
                 "status": 500,
-                "message": "An error occurred while updating your confirmation key."
+                "message": "An error occurred while updating your change key."
             })
             return
         }
 
-        const sendEmail = await sendPassChangeEmail(userID, username, confirmationKey);
-        if(sendEmail){
+        const sendEmail = await sendPassChangeEmail(userID, username, changeKey);
+        if (sendEmail) {
             response.status(200).json({
                 "answer": false,
                 "status": 200,
@@ -243,9 +259,9 @@ loginRouter.post('/forgot', async (request, response) => {
 loginRouter.get('/password', async (request, response) => {
     try {
         const userID = request.query.id;
-        const confirmationKey = request.query.key;
+        const changeKey = request.query.key;
         const isValidID = (userID != undefined && userID != "");
-        const isValidKey = (confirmationKey != undefined && confirmationKey != "");
+        const isValidKey = (changeKey != undefined && changeKey != "");
 
         if (!isValidID || !isValidKey) {
             response.status(400).json({
@@ -256,7 +272,7 @@ loginRouter.get('/password', async (request, response) => {
             return
         }
 
-        const existRequest = await searchChangeRequest(userID, confirmationKey);
+        const existRequest = await searchChangeRequest(userID, changeKey);
 
         if (!existRequest || existRequest == "") {
             response.status(404).json({
@@ -289,12 +305,11 @@ loginRouter.post('/password', async (request, response) => {
             return
         }
         const userID = request.body.id;
-        const password = request.body.password;
+        const hashPass = await bcrypt.hash(request.body.password, 10);
+        const setPass = await updatePassword(hashPass, userID);
+        const removeKey = await removeChangeKey(userID);
 
-        const setPass = await updatePassword(password, userID);
-        const confirm = await confirmAccount(userID);
-
-        if (setPass && confirm) {
+        if (setPass && removeKey) {
             response.status(200).json({
                 "answer": true,
                 "status": 200,
@@ -309,6 +324,37 @@ loginRouter.post('/password', async (request, response) => {
             "message": "An error occurred while processing your request."
         })
     }
+})
+
+loginRouter.post('/google', async (request, response) => {
+    try {
+        if (!request.body) {
+
+            response.status(400).json({
+                "answer": false,
+                "status": 400,
+                "message": "Access denied."
+            });
+            return
+        }
+
+        const credential = request.body.jwt;
+        const credentialJSON = decodeJWTgoogleToken(credential);
+
+        const username =  credentialJSON.email;
+        const name =  credentialJSON.name;
+        const avatar =  credentialJSON.picture;
+
+
+    } catch (error) {
+        console.error(error);
+        response.status(500).json({
+            "answer": false,
+            "status": 500,
+            "message": "An error occurred while processing your request."
+        })
+    }
+
 })
 app.use(express.static('client'));
 app.use(express.json());

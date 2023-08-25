@@ -1,12 +1,12 @@
 import {
-    isValidEmail, setError, removeErrors, checkRecoverButton
+    isValidEmail, setError, removeErrors, checkChangeButton
 } from "./utils.js";
 
 const mainDiv = document.getElementsByClassName("centered-div")[0];
 const emailElement = document.getElementById("email");
 emailElement.addEventListener("change", validateEmail);
-const recoverButton = document.getElementById("recover");
-recoverButton.addEventListener("click", validateRecover);
+const changeButton = document.getElementById("change");
+changeButton.addEventListener("click", validateChange);
 
 
 function validateEmail() {
@@ -14,8 +14,8 @@ function validateEmail() {
 
     if (!isValidValue) {
         const errorMessage = "Please provide a valid email. i.e. 'example@example.com'";
-        setError(emailElement, mainDiv, recoverButton, "email", errorMessage);
-        checkRecoverButton(emailElement, "recover");
+        setError(emailElement, mainDiv, changeButton, "email", errorMessage);
+        checkChangeButton(emailElement, "change");
         return
     }
 
@@ -23,10 +23,10 @@ function validateEmail() {
     if (hasBorderError)
         removeErrors(emailElement, "email");
 
-    checkRecoverButton(emailElement, "recover");
+    checkChangeButton(emailElement, "change");
 }
 
-function validateRecover() {
+function validateChange() {
     const configAPI = {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
@@ -42,8 +42,8 @@ function validateRecover() {
         const hasEmailError = (emailElement.style.borderColor == "red");
         if(userNotFound && !hasEmailError){
             const errorMessage = "Sorry, but the email provided is not correct or he is not registered.";
-            setError(emailElement, mainDiv, recoverButton, "email", errorMessage);
-            checkRecoverButton(emailElement, "recover");
+            setError(emailElement, mainDiv, changeButton, "email", errorMessage);
+            checkChangeButton(emailElement, "change");
             return
         }
 
