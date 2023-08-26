@@ -5,11 +5,13 @@ const checkRememberMe = (user) => {
     if (isChecked) {
         localStorage.setItem("name", user.name);
         localStorage.setItem("avatar", user.avatar);
+        localStorage.setItem("loginType", "default");
         return
     }
 
     sessionStorage.setItem("name", user.name);
     sessionStorage.setItem("avatar", user.avatar);
+    sessionStorage.setItem("loginType", "default");
 }
 
 const enableSubmitButton = (elementId) => {
@@ -85,6 +87,7 @@ const removeErrorMessage = (type) => {
     const element = document.getElementById(`error_${type}`);
     element.remove();
 };
+
 
 const hasErrorMessage = (type) => {
     const element = document.getElementById(`error_${type}`);
@@ -170,5 +173,5 @@ export {
     addErrorBorder, hasErrorBorder, addErrorMessage,
     setError, removeErrors, checkChangeButton,
     hasOnlyLetters, checkSignupButton, disableSubmitButton,
-    checkChangePassButton
+    checkChangePassButton, hasErrorMessage
 };

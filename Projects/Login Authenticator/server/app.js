@@ -1,14 +1,14 @@
 const express = require('express');
 const bcrypt = require("bcryptjs");
-const path = require('path');
 const {
     insertUser, updateLastLogin, isUsernameAvailable,
     addChangeKey, removeChangeKey, updatePassword, searchChangeRequest,
-    searchEmail
+    searchUser
 } = require('./db');
 
 const { generateChangeToken, decodeJWTgoogleToken } = require('./security');
 const { sendPassChangeEmail } = require('./email');
+const { sendResponse, sendStaticFile } = require("./app_utils");
 const app = express();
 const loginRouter = express.Router();
 const port = 8383;
@@ -17,11 +17,7 @@ loginRouter.post('/', async (request, response) => {
 
     try {
         if (!request.body) {
-            response.status(400).json({
-                "answer": false,
-                "status": 400,
-                "message": "Access denied."
-            });
+            sendResponse(response, 400, "Access denied.");
             return
         }
         const user = {
@@ -29,25 +25,17 @@ loginRouter.post('/', async (request, response) => {
             password: request.body.password
         };
 
-        const data = await searchEmail(user.username);
+        const data = await searchUser(user.username);
         const existUser = (data != "");
 
         if (!existUser) {
-            response.status(404).json({
-                "answer": false,
-                "status": 404,
-                "message": "The user was not found."
-            });
+            sendResponse(response, 404, "The user was not found.");
             return
         }
 
         const samePassword = await bcrypt.compare(user.password, data[0].user_password);
         if (!samePassword) {
-            response.status(409).json({
-                "answer": false,
-                "status": 409,
-                "message": "The user email or password is not valid."
-            });
+            sendResponse(response, 409, "The user email or password is not valid.");
             return
         }
 
@@ -55,15 +43,7 @@ loginRouter.post('/', async (request, response) => {
 
             const setLastLogin = await updateLastLogin(data[0].id);
             if (setLastLogin) {
-                response.status(200).json({
-                    "answer": true,
-                    "status": 200,
-                    "message": "The user was found.",
-                    "data": {
-                        name: data[0].name,
-                        avatar: data[0].profile_avatar
-                    }
-                });
+                sendResponse(response, 200, "The user was found.");
                 return
             }
         }
@@ -71,28 +51,19 @@ loginRouter.post('/', async (request, response) => {
 
     } catch (error) {
         console.error(error);
-        response.status(500).json({
-            "answer": false,
-            "status": 500,
-            "message": "An error occurred while processing your request."
-        });
+        sendResponse(response, 500, "An error occurred while processing your request.");
     }
 
 })
 
 loginRouter.get('/perfil', (request, response) => {
-    const directory = path.resolve(__dirname, '..');
-    response.sendFile(directory + '/client/perfil.html');
+    sendStaticFile(response, "perfil.html")
 })
 
 loginRouter.post('/perfil', async (request, response) => {
     try {
         if (!request.body) {
-            response.status(400).json({
-                "answer": false,
-                "status": 400,
-                "message": "Access denied."
-            });
+            sendResponse(response, 400, "Access denied.");
             return
         }
 
@@ -102,44 +73,32 @@ loginRouter.post('/perfil', async (request, response) => {
         }
 
         const data = await searchAccount(user);
-        response.status(200).json({
-            "answer": true,
-            "status": 200,
-            "message": "The user was found.",
-            "data": {
-                name: data[0].name,
-                avatar: data[0].profile_avatar
-            }
-        });
+        const dataOBJ = {
+            name: data[0].name,
+            avatar: data[0].profile_avatar
+        };
+
+        sendResponse(response, 200, "The user was found.", dataOBJ);
 
     } catch (error) {
         console.error(error);
-        response.status(500).json({
-            "answer": false,
-            "status": 500,
-            "message": "An error occurred while processing your request."
-        })
+        sendResponse(response, 500, "An error occurred while processing your request.");
     }
 
 })
 
 loginRouter.get('/signup', (request, response) => {
-    const directory = path.resolve(__dirname, '..');
-    response.sendFile(directory + '/client/signup.html');
+    sendStaticFile(response, "signup.html");
 })
 
 loginRouter.post('/signup', async (request, response) => {
     try {
         if (!request.body) {
-            response.status(400).json({
-                "answer": false,
-                "status": 400,
-                "message": "Access denied."
-            });
+            sendResponse(response, 400, "Access denied.");
             return
         }
         const randomNumber = Math.floor(Math.random() * 10); //Only [0-9]
-        const profileAvatar = `user_profile${randomNumber}.png`;
+        const profileAvatar = `./img/user_profile${randomNumber}.png`;
 
         const hashPass = await bcrypt.hash(request.body.password, 10);
         const user = {
@@ -152,71 +111,46 @@ loginRouter.post('/signup', async (request, response) => {
         const checkUsername = await isUsernameAvailable(user.username);
         const isAvailable = (checkUsername == "");
         if (!isAvailable) {
-            response.status(409).json({
-                "answer": false,
-                "status": 409,
-                "message": "Username already registered."
-            });
+            sendResponse(response, 409, "Username already registered.");
             return
         }
 
         const data = await insertUser(user);
         if (data) {
-            response.status(200).json({
-                "answer": true,
-                "status": 200,
-                "message": "User successfully registered.",
-                "data": {
-                    name: user.name,
-                    avatar: user.avatar
-                }
-            })
+            const dataOBJ = {
+                name: user.name,
+                avatar: user.avatar
+            };
+            sendResponse(response, 200, "User successfully registered.", dataOBJ);
         }
 
     } catch (error) {
         console.error(error);
-        response.status(500).json({
-            "answer": false,
-            "status": 500,
-            "message": "An error occurred while processing your request."
-        })
+        sendResponse(response, 500, "An error occurred while processing your request.");
     }
 })
 
 loginRouter.get('/forgot', (request, response) => {
-    const directory = path.resolve(__dirname, '..');
-    response.sendFile(directory + '/client/forgot.html');
+    sendStaticFile(response, "forgot.html");
 })
 
 loginRouter.post('/forgot', async (request, response) => {
     try {
         if (!request.body) {
-            response.status(400).json({
-                "answer": false,
-                "status": 400,
-                "message": "Access denied."
-            });
+            sendResponse(response, 400, "Access denied.");
             return
         }
 
         const username = request.body.email;
-        const existUsername = await searchEmail(username);
+        const existUsername = await searchUser(username);
         if (!existUsername || existUsername == "") {
-            response.status(404).json({
-                "answer": false,
-                "status": 404,
-                "message": "The user was not found."
-            });
+            sendResponse(response, 404, "The user was not found.");
             return
         }
 
         const alreadySentRequest = (existUsername[0].change_key != "");
         if (alreadySentRequest) {
-            response.status(409).json({
-                "answer": false,
-                "status": 409,
-                "message": "Already exist a password change request."
-            });
+            sendResponse(response, 409, "Already exist a password change request.");
             return
         }
 
@@ -225,32 +159,20 @@ loginRouter.post('/forgot', async (request, response) => {
 
         const updateUser = await addChangeKey(changeKey, userID);
         if (!updateUser || updateUser == "") {
-            response.status(500).json({
-                "answer": false,
-                "status": 500,
-                "message": "An error occurred while updating your change key."
-            })
+            sendResponse(response, 500, "An error occurred while updating your change key.");
             return
         }
 
         const sendEmail = await sendPassChangeEmail(userID, username, changeKey);
         if (sendEmail) {
-            response.status(200).json({
-                "answer": false,
-                "status": 200,
-                "message": "Password change email sent successfully"
-            });
+            sendResponse(response, 200, "Password change email sent successfully.");
             console.log("Password change email sent successfully.");
             return
         }
 
     } catch (error) {
         console.error(error);
-        response.status(500).json({
-            "answer": false,
-            "status": 500,
-            "message": "An error occurred while processing your request."
-        })
+        sendResponse(response, 500, "An error occurred while processing your request.");
     }
 
 
@@ -264,44 +186,28 @@ loginRouter.get('/password', async (request, response) => {
         const isValidKey = (changeKey != undefined && changeKey != "");
 
         if (!isValidID || !isValidKey) {
-            response.status(400).json({
-                "answer": false,
-                "status": 400,
-                "message": "Access denied."
-            });
+            sendResponse(response, 400, "Access denied.");
             return
         }
 
         const existRequest = await searchChangeRequest(userID, changeKey);
 
         if (!existRequest || existRequest == "") {
-            response.status(404).json({
-                "answer": false,
-                "status": 404,
-                "message": "The request was not found."
-            });
+            sendResponse(response, 404, "The request was not found.");
             return
         }
-        const directory = path.resolve(__dirname, '../');
-        response.sendFile(directory + '/client/new_password.html');
+
+        sendStaticFile(response, "new_password.html");
     } catch (error) {
         console.error(error);
-        response.status(500).json({
-            "answer": false,
-            "status": 500,
-            "message": "An error occurred while processing your request."
-        })
+        sendResponse(response, 500, "An error occurred while processing your request.");
     }
 })
 
 loginRouter.post('/password', async (request, response) => {
     try {
         if (!request.body) {
-            response.status(400).json({
-                "answer": false,
-                "status": 400,
-                "message": "Access denied."
-            });
+            sendResponse(response, 400, "Access denied.");
             return
         }
         const userID = request.body.id;
@@ -310,52 +216,82 @@ loginRouter.post('/password', async (request, response) => {
         const removeKey = await removeChangeKey(userID);
 
         if (setPass && removeKey) {
-            response.status(200).json({
-                "answer": true,
-                "status": 200,
-                "message": "Password successfully updated."
-            })
+            sendResponse(response, 200, "Password successfully updated.");
         }
     } catch (error) {
         console.error(error);
-        response.status(500).json({
-            "answer": false,
-            "status": 500,
-            "message": "An error occurred while processing your request."
-        })
+        sendResponse(response, 500, "An error occurred while processing your request.");
     }
 })
 
 loginRouter.post('/google', async (request, response) => {
     try {
         if (!request.body) {
-
-            response.status(400).json({
-                "answer": false,
-                "status": 400,
-                "message": "Access denied."
-            });
+            sendResponse(response, 400, "Access denied.");
             return
         }
 
         const credential = request.body.jwt;
         const credentialJSON = decodeJWTgoogleToken(credential);
 
-        const username =  credentialJSON.email;
-        const name =  credentialJSON.name;
-        const avatar =  credentialJSON.picture;
+        const getUser = await searchUser(credentialJSON.email, "Google");
 
+        if (!getUser || getUser == "") {
+            sendResponse(response, 404, "The user was not registered in database.");
+            return
+        }
 
+        const dataOBJ = {
+            jwt: credentialJSON
+        };
+
+        sendResponse(response, 200, "The user was found in database.", dataOBJ);
     } catch (error) {
         console.error(error);
-        response.status(500).json({
-            "answer": false,
-            "status": 500,
-            "message": "An error occurred while processing your request."
-        })
+        sendResponse(response, 500, "An error occurred while processing your request.");
     }
 
 })
+
+loginRouter.post('/signupGoogle', async (request, response) => {
+    try {
+        if (!request.body) {
+            sendResponse(response, 400, "Access denied.");
+            return
+        }
+
+        const credential = request.body.jwt;
+        const credentialJSON = decodeJWTgoogleToken(credential);
+
+        const getUser = await searchUser(credentialJSON.email, "Google");
+        if (getUser != "") {
+            sendResponse(response, 409, "This Google account was already registered.");
+            return
+        }
+
+        const user = {
+            name: credentialJSON.name,
+            username: credentialJSON.email,
+            password: "NOT REQUIRED",
+            avatar: "NOT REQUIRED"
+        }
+
+        const data = await insertUser(user, "google");
+
+        if (data) {
+            const dataOBJ = {
+                jwt: credentialJSON
+            };
+
+            sendResponse(response, 200, "Google user successfully registered.", dataOBJ);
+        }
+
+    } catch (error) {
+        console.error(error);
+        sendResponse(response, 500, "An error occurred while processing your request.");
+    }
+})
+
 app.use(express.static('client'));
 app.use(express.json());
 app.use('/', loginRouter);

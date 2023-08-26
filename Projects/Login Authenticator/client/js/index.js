@@ -1,7 +1,7 @@
 import {
     checkRememberMe, isValidEmail, checkLoginButton,
     addErrorBorder, hasErrorBorder, addErrorMessage,
-    setError, removeErrors
+    setError, removeErrors, hasErrorMessage
 } from "./utils.js";
 
 checkLocalStorage();

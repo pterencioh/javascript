@@ -19,12 +19,12 @@ const connect = () => {
     return connection
 }
 
-const insertUser = (user) => {
+const insertUser = (user, loginType = "default") => {
     return new Promise((resolve, reject) => {
         const db = connect();
-        const columns = "name, username, user_password, profile_avatar";
-        const sql = `INSERT INTO users (${columns}) values (? , ? , ?, ?)`;
-        const params = [user.name, user.username, user.password, user.avatar];
+        const columns = "name, username, user_password, profile_avatar, login_type";
+        const sql = `INSERT INTO users (${columns}) values (?, ?, ?, ?, ?)`;
+        const params = [user.name, user.username, user.password, user.avatar, loginType];
 
         db.query(sql, params, (err, result) => {
             err ? reject(err) : resolve(result);
@@ -119,15 +119,15 @@ const searchChangeRequest = (userID, changeKey) => {
     })
 }
 
-const searchEmail = (email) => {
+const searchUser = (username, loginType = 'default') => {
     return new Promise((resolve, reject) => {
         const db = connect();
-        const sql = 'SELECT * FROM users WHERE username = ?';
-        const params = [email];
+        const sql = 'SELECT * FROM users WHERE username = ? AND login_type = ?';
+        const params = [username, loginType];
 
         db.query(sql, params, (err, result) => {
             err ? reject(err) : resolve(result);
-            console.log('Database connection completed - searchEmail');
+            console.log('Database connection completed - searchUser');
             db.end();
         })
     })
@@ -136,5 +136,5 @@ const searchEmail = (email) => {
 module.exports = { 
     insertUser, updateLastLogin, isUsernameAvailable,
     addChangeKey, removeChangeKey, updatePassword, searchChangeRequest,
-    searchEmail
+    searchUser
 };

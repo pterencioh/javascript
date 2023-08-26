@@ -12,7 +12,6 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    /*     background: seagreen; */
 }
 
 input::placeholder{
@@ -21,7 +20,6 @@ input::placeholder{
 .centered-div {
     margin-top: -100px;
     width: 400px;
-/*         background: orangered; */
     border-radius: 20px;
 }
 
@@ -103,12 +101,6 @@ input:-webkit-autofill:focus{
     font-size: 12px;
 }
 
-/* #showConfirmPassword {
-    display: block;
-    margin-top: 5px;
-    margin-top: 50px;
-} */
-
 .options {
     position: relative;
     display: flex;
@@ -165,7 +157,6 @@ hr {
     font-size: 25px;
 }
 
-
-.g_id_signin {
-    width: 100%;
+.centered-div .imgAvatar {
+        border-radius: 50%;
 }

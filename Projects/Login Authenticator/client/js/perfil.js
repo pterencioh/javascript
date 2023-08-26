@@ -1,8 +1,9 @@
 const checkLocalStorage = () => {
     const name =  localStorage.getItem("name") || sessionStorage.getItem("name");
     const avatar =  localStorage.getItem("avatar") || sessionStorage.getItem("avatar");
+    const loginType = localStorage.getItem("loginType") || sessionStorage.getItem("loginType");
 
-    if(!name && !avatar)
+    if(!name && !avatar && loginType)
         window.open("/","_self");
 
     createHTML(name, avatar);
@@ -11,10 +12,10 @@ const checkLocalStorage = () => {
 
 const createHTML = (name, avatar) => {
     const mainDiv = document.getElementsByClassName("centered-div")[0];
-
     const img = document.createElement("img");
-    img.setAttribute("src", "./img/" + avatar);
+    img.setAttribute("src", avatar);
     img.setAttribute("alt", name);
+    img.classList.add("imgAvatar");
     mainDiv.appendChild(img);
 
     const divInfo = document.createElement("div");
