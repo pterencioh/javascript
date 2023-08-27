@@ -1,6 +1,6 @@
 import {
     isValidEmail, setError, removeErrors, checkChangeButton
-} from "./utils.js";
+} from "./utils/utils.js";
 
 const mainDiv = document.getElementsByClassName("centered-div")[0];
 const emailElement = document.getElementById("email");

@@ -1,6 +1,6 @@
 import {
     setError, removeErrors, checkChangePassButton
-} from "./utils.js";
+} from "./utils/utils.js";
 
 const mainDiv = document.getElementsByClassName("centered-div")[0];
 

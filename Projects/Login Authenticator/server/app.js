@@ -8,7 +8,7 @@ const {
 
 const { generateChangeToken, decodeJWTgoogleToken } = require('./security');
 const { sendPassChangeEmail } = require('./email');
-const { sendResponse, sendStaticFile } = require("./app_utils");
+const { sendResponse, sendStaticFile } = require("./appUtils");
 const app = express();
 const loginRouter = express.Router();
 const port = 8383;
@@ -197,7 +197,7 @@ loginRouter.get('/password', async (request, response) => {
             return
         }
 
-        sendStaticFile(response, "new_password.html");
+        sendStaticFile(response, "newPassword.html");
     } catch (error) {
         console.error(error);
         sendResponse(response, 500, "An error occurred while processing your request.");

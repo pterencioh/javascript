@@ -2,7 +2,7 @@ import {
     checkRememberMe, isValidEmail, checkLoginButton,
     addErrorBorder, hasErrorBorder, addErrorMessage,
     setError, removeErrors, hasErrorMessage
-} from "./utils.js";
+} from "./utils/utils.js";
 
 checkLocalStorage();
 

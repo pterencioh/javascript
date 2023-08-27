@@ -1,7 +1,7 @@
 import {
     isValidEmail, setError, removeErrors, checkSignupButton,
     hasOnlyLetters, disableSubmitButton
-} from "./utils.js";
+} from "./utils/utils.js";
 
 const mainDiv = document.getElementsByClassName("centered-div")[0];
 const nameElement = document.getElementById("name");
